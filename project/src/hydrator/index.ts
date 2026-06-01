@@ -7,7 +7,7 @@ import Comp from "./index.vue";
 const index = async (_p:_p_TYP) => {
     return {
         set: async (_$p:_$p_TYP,) => {
-            console.log(`--hydrator [${_$p[`data`][`curr`].type}]`);
+            console.log(`--hydrator [${String(_$p[`data`][`curr`].type).replace(/[\r\n\t]/g, '')}]`);
 
 
             //set..
