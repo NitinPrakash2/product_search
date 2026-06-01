@@ -54,9 +54,9 @@
           <template v-if="group.typ === 'price'">
             <div style="display:flex;gap:8px;margin-bottom:8px;">
               <input v-model="customPriceMin" type="number" placeholder="Min"
-                :style="{ width:'100%', padding:'7px 10px', fontSize:'12px', border:'1px solid ' + (props.config?.theme === 'dark' ? '#334155' : '#d4d5d9'), borderRadius:'4px', outline:'none', color: props.config?.theme === 'dark' ? '#e2e8f0' : '#282c3f', background: props.config?.theme === 'dark' ? '#0f172a' : '#fff' }" />
+                :style="{ width:'100%', padding:'7px 10px', fontSize:'12px', border:'1px solid ' + (props.config?.theme === 'dark' ? '#334155' : '#d4d5d9'), borderRadius:'4px', outline:'none', color: props.config?.theme === 'dark' ? '#e2e8f0' : '#282c3f', background: props.config?.theme === 'dark' ? '#0f172a' : '#fff', WebkitAppearance:'none', MozAppearance:'textfield' }" />
               <input v-model="customPriceMax" type="number" placeholder="Max"
-                :style="{ width:'100%', padding:'7px 10px', fontSize:'12px', border:'1px solid ' + (props.config?.theme === 'dark' ? '#334155' : '#d4d5d9'), borderRadius:'4px', outline:'none', color: props.config?.theme === 'dark' ? '#e2e8f0' : '#282c3f', background: props.config?.theme === 'dark' ? '#0f172a' : '#fff' }" />
+                :style="{ width:'100%', padding:'7px 10px', fontSize:'12px', border:'1px solid ' + (props.config?.theme === 'dark' ? '#334155' : '#d4d5d9'), borderRadius:'4px', outline:'none', color: props.config?.theme === 'dark' ? '#e2e8f0' : '#282c3f', background: props.config?.theme === 'dark' ? '#0f172a' : '#fff', WebkitAppearance:'none', MozAppearance:'textfield' }" />
             </div>
             <button @click="applyCustomPrice"
               style="width:100%;padding:8px;font-size:12px;font-weight:700;color:#fff;background:#ff3f6c;border:none;border-radius:4px;cursor:pointer;letter-spacing:0.04em;">
@@ -536,5 +536,15 @@ onMounted(async () => {
 /* On mobile: always show floating button even when sidebar layout is set */
 @media (max-width: 767px) {
   .mobile-filter-btn { display: block !important; }
+}
+
+/* Remove number input spinners */
+.sidebar-scroll input[type=number]::-webkit-inner-spin-button,
+.sidebar-scroll input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.sidebar-scroll input[type=number] {
+  -moz-appearance: textfield;
 }
 </style>
