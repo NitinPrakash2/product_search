@@ -151,7 +151,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
 import axios from 'axios';
 import ContentEngine from './Contentengin.vue';
 import ProductFilter from '../src/components/Productfilter.vue';
@@ -160,10 +159,9 @@ import { createTemplate } from "bind-str";
 
 const { _p, __p:_$p } = defineProps<{ _p: _p_TYP, __p: _$p_TYP }>();
 
-const router = useRouter();
 const searchQuery = ref('');
-const formProducts = ref<any[]>([]); // products from the custom form
-const apiProducts = ref<any[]>([]); // products from the API
+const formProducts = ref<any[]>([]);
+const apiProducts = ref<any[]>([]);
 const products = computed(() => [...formProducts.value, ...apiProducts.value]);
 const activeFilterByString = ref<string>('');
 const isDark = ref(false);
@@ -193,26 +191,6 @@ const _onFormChange = (e: Event) => {
   }));
 };
 window.addEventListener('product:form:change', _onFormChange);
-
-// also listen via CE bus (works when same _p instance is shared)
-_p.f.listen('msg', (_$: any) => {
-  if (_$.type !== 'product:form:change') return;
-  const list: any[] = _$.custom?.data?.value?.l ?? [];
-  formProducts.value = list.map((p: any) => ({
-    _fromForm: true,
-    document: {
-      id: `form-${p.title}`,
-      title: p.title || 'Untitled',
-      brand: 'My Store',
-      variant_prices: [Number(p.price) || 0],
-      variant_mrp: [],
-      slug: '',
-    },
-    images: p.image ? [p.image] : [],
-    activeIdx: 0,
-    interval: null,
-  }));
-});
 
 const _t_temp = createTemplate(_$p.data.curr.data.api[`token`], {open:"<",close:">"});
 const _token = _t_temp({ localStorage: { token: localStorage.getItem(`token`) || `` } }).replace(`Bearer `, ``);
@@ -348,28 +326,6 @@ const toggleWishlist = (e: Event) => {
 
 onMounted(() => {
   initTheme();
-  // replay persisted form products immediately on load
-  try {
-    const key = `product_form_${_$p?.data?.curr?.id ?? 'default'}`;
-    const saved = localStorage.getItem(key);
-    if (saved) {
-      const list: any[] = JSON.parse(saved);
-      formProducts.value = list.map((p: any) => ({
-        _fromForm: true,
-        document: {
-          id: `form-${p.title}`,
-          title: p.title || 'Untitled',
-          brand: 'My Store',
-          variant_prices: [Number(p.price) || 0],
-          variant_mrp: [],
-          slug: '',
-        },
-        images: p.image ? [p.image] : [],
-        activeIdx: 0,
-        interval: null,
-      }));
-    }
-  } catch {}
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('q')) searchQuery.value = urlParams.get('q') || '';
   handleSearch().then(() => setTimeout(() => setupObserver(), 100));
