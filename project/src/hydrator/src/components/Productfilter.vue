@@ -189,10 +189,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, reactive, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, reactive, onMounted, watch } from 'vue'
 import type { FilterGroup, FilterConfig, FilterData, _$p_TYP } from "../../../shared/types"
+import { createTemplate } from "bind-str"
 
 const props = defineProps<{ _p: any, _$p: _$p_TYP, _$cb: any, config?: FilterConfig }>()
+
+const _t_temp = createTemplate(props._$p.data.curr.data.api[`token`], { open: '<', close: '>' })
+const API_TOKEN = _t_temp({ localStorage: { token: localStorage.getItem('token') || '' } }).replace('Bearer ', '')
+const API_URL = props._$p.data.curr.data.api[`url`]?.split('?')[0]
 
 const currentTheme = computed(() => props.config?.theme || filterData.value?.theme || 'light')
 
@@ -262,7 +267,6 @@ const parseUrlToState = () => {
 
 const fetchFilters = async (showLoader = false) => {
   if (showLoader) isFilterLoading.value = true
-  const authToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImYwZTNlMDRiLTVkNDAtNDg1ZS05OGU4LWEzOTI3NWU3MzM0OCIsInNlY3VyaXR5Ijp7InBhcnR5IjpbInBhcnR5XzEiLCJwYXJ0eV8yIl19LCJzdWIiOiJmMGUzZTA0Yi01ZDQwLTQ4NWUtOThlOC1hMzkyNzVlNzMzNDgiLCJpYXQiOjE3NjU4MTI4Mjh9.OoClnPtlxI71L-e555nbNSmenmGufxewp78SlmdZCNxeuauXao5RRvqwOKQ77SJFqJXk0ng6GZ7VOgYECdEf-3k1UGX7w1NE_D5A6SP3UkVsSG8orYACFuvTyesbFwkpnEhdu0PBd6n8wuLkgU6nZ1bLDzKVg1zd8fFeJrwmUqk'
   const filterByString = buildFilterQuery()
   const requestBody: any = {
     raw_text: searchQueryFromUrl.value || '_', q: searchQueryFromUrl.value || '*',
@@ -273,9 +277,9 @@ const fetchFilters = async (showLoader = false) => {
   }
   if (filterByString) requestBody.filter_by = filterByString
   try {
-    const res = await fetch('https://fastapi.dryutil.1mn.io/client/api/i/ona/product_dir?typ=get_filter_data', {
+    const res = await fetch(`${API_URL}?typ=get_filter_data`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_TOKEN}` },
       body: JSON.stringify(requestBody)
     })
     const json = await res.json()
