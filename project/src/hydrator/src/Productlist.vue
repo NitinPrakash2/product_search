@@ -1,24 +1,31 @@
 <template>
-  <div class="bg-gray-50/50 dark:bg-[#0b1120] min-h-screen pb-20 font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300 antialiased">
+  <div class="bg-white min-h-screen font-sans text-slate-900 antialiased">
 
-    <ProductFilter :_p="_p" :_$p="_$p" :_$cb="filterCb" :config="{ theme: isDark ? 'dark' : 'light' }" />
+    <!-- Myntra-style layout: sidebar + content -->
+    <div style="display:flex;align-items:flex-start;width:100%;background:#f8fafc;">
 
-    <div class="max-w-[1440px] mx-auto w-full px-3 md:px-6 py-4 md:py-6">
+      <!-- LEFT SIDEBAR FILTER -->
+      <aside id="desktop-sidebar" style="width:240px;min-width:240px;border-right:1px solid #e5e7eb;position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#e9e9eb transparent;">
+        <ProductFilter :_p="_p" :_$p="_$p" :_$cb="filterCb" :config="{ theme: isDark ? 'dark' : 'light', layout: 'sidebar' }" />
+      </aside>
 
-      <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-        <div v-for="n in 12" :key="n" class="bg-white dark:bg-[#1e293b] rounded-2xl p-3 shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col gap-3">
-          <div class="aspect-[4/5] bg-gray-200 dark:bg-slate-700/50 rounded-xl relative overflow-hidden">
-            <div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+      <!-- RIGHT CONTENT -->
+      <div style="flex:1;min-width:0;padding:16px 20px 80px;">
+
+      <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+        <div v-for="n in 12" :key="n" class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex flex-col gap-3">
+          <div class="aspect-[4/5] bg-gray-100 rounded-xl relative overflow-hidden">
+            <div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div>
           </div>
           <div class="space-y-2 mt-1 px-1">
-            <div class="h-5 bg-gray-200 dark:bg-slate-700/50 rounded-md w-1/2 relative overflow-hidden"><div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div></div>
-            <div class="h-3 bg-gray-200 dark:bg-slate-700/50 rounded-md w-1/3 relative overflow-hidden"><div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div></div>
-            <div class="h-10 bg-gray-200 dark:bg-slate-700/50 rounded-xl w-full mt-3 relative overflow-hidden"><div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div></div>
+            <div class="h-5 bg-gray-100 rounded-md w-1/2 relative overflow-hidden"><div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div></div>
+            <div class="h-3 bg-gray-100 rounded-md w-1/3 relative overflow-hidden"><div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div></div>
+            <div class="h-10 bg-gray-100 rounded-xl w-full mt-3 relative overflow-hidden"><div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div></div>
           </div>
         </div>
       </div>
 
-      <ul v-else-if="products.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5 list-none">
+      <ul v-else-if="products.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5 list-none">
         <li
           v-for="(item, index) in products"
           :key="(item.document?.id || '') + index"
@@ -145,7 +152,8 @@
           <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
         </div>
       </div>
-    </div>
+      </div><!-- end right content -->
+    </div><!-- end flex layout -->
 
     <ContentEngine ref="cartPopupRef" v-bind="{ ce_file: _var.cart_popup.ce_file }" />
   </div>
@@ -227,7 +235,7 @@ const _var = ref({ cart_popup: { ce_file: _$p.data.curr.data.cart_popup[`ce_file
 const filterCb: _$cb_TYP = {
   change: (eventData: any) => {
     if (eventData && eventData.filter_by !== undefined) activeFilterByString.value = eventData.filter_by;
-    page.value = 1; products.value = []; hasMore.value = true; loading.value = true;
+    page.value = 1; apiProducts.value = []; hasMore.value = true; loading.value = true;
     fetchProducts();
   }
 };
@@ -387,6 +395,11 @@ onUnmounted(() => { if (observer) observer.disconnect(); window.removeEventListe
 
 <style>
 @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+/* Hide sidebar on mobile, show on desktop */
+@media (max-width: 767px) {
+  #desktop-sidebar { display: none !important; }
+}
 
 /* Card entrance animation */
 @keyframes cardEnter {

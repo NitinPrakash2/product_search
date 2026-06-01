@@ -111,7 +111,7 @@ export interface AppliedFilters {
 
 export interface FilterConfig {
   theme?: 'light' | 'dark';
-  layout?: 'sidebar' | 'modal' | 'drawer';
+  layout?: 'sidebar' | 'modal' | 'drawer' | string;
   showCounts?: boolean;
   showClearAll?: boolean;
   showApplyButton?: boolean;

@@ -1,8 +1,126 @@
 <template>
   <div>
-    <!-- Floating Filter Button (all screen sizes) -->
+
+    <!-- ═══════════════════════════════════════════════
+         SIDEBAR LAYOUT (desktop) — Myntra style
+    ════════════════════════════════════════════════ -->
+    <div v-if="props.config?.layout === 'sidebar'" class="sidebar-scroll" style="background:#fff;height:100%;overflow-y:auto;">
+
+      <!-- Header -->
+      <div style="padding:16px 16px 12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:13px;font-weight:800;letter-spacing:0.08em;color:#282c3f;">FILTERS</span>
+        <button v-if="totalSelectedFilters > 0" @click="clearAllFilters"
+          style="font-size:11px;font-weight:700;color:#ff3f6c;letter-spacing:0.04em;background:none;border:none;cursor:pointer;">
+          CLEAR ALL
+        </button>
+      </div>
+
+      <!-- Applied filter chips -->
+      <div v-if="totalSelectedFilters > 0" style="padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid #f0f0f0;">
+        <template v-for="(vals, typ) in appliedFilters" :key="typ">
+          <span v-for="val in (Array.isArray(vals) ? vals : [])"
+            :key="val"
+            style="display:inline-flex;align-items:center;gap:4px;background:#fff0f3;color:#ff3f6c;font-size:11px;font-weight:600;padding:3px 8px;border-radius:12px;border:1px solid #ffc2d0;">
+            {{ val }}
+            <span @click="toggleFilter(String(typ), val)" style="cursor:pointer;font-size:13px;line-height:1;">×</span>
+          </span>
+        </template>
+      </div>
+
+      <!-- Filter groups -->
+      <div v-for="group in visibleFilterGroups" :key="group.typ"
+        style="border-bottom:1px solid #f0f0f0;">
+
+        <!-- Group header -->
+        <button @click="toggleSidebarGroup(group.typ)"
+          style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:none;border:none;cursor:pointer;">
+          <span style="font-size:11px;font-weight:800;letter-spacing:0.08em;color:#282c3f;">
+            {{ group.title.toUpperCase() }}
+            <span v-if="appliedFilters[group.typ]?.length"
+              style="margin-left:4px;background:#ff3f6c;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;">
+              {{ appliedFilters[group.typ].length }}
+            </span>
+          </span>
+          <svg :style="{ transform: collapsedGroups[group.typ] ? 'rotate(-90deg)' : 'rotate(0deg)', transition:'transform 0.2s' }"
+            width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5">
+            <path d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
+        <!-- Group content -->
+        <div v-show="!collapsedGroups[group.typ]" style="padding:0 16px 12px;">
+
+          <!-- Price -->
+          <template v-if="group.typ === 'price'">
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <input v-model="customPriceMin" type="number" placeholder="Min"
+                style="width:100%;padding:7px 10px;font-size:12px;border:1px solid #d4d5d9;border-radius:4px;outline:none;color:#282c3f;background:#fff;" />
+              <input v-model="customPriceMax" type="number" placeholder="Max"
+                style="width:100%;padding:7px 10px;font-size:12px;border:1px solid #d4d5d9;border-radius:4px;outline:none;color:#282c3f;background:#fff;" />
+            </div>
+            <button @click="applyCustomPrice"
+              style="width:100%;padding:8px;font-size:12px;font-weight:700;color:#fff;background:#ff3f6c;border:none;border-radius:4px;cursor:pointer;letter-spacing:0.04em;">
+              APPLY
+            </button>
+          </template>
+
+          <!-- Checkbox list -->
+          <template v-else>
+            <div style="position:relative;margin-bottom:8px;">
+              <svg style="position:absolute;left:8px;top:50%;transform:translateY(-50%);" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+              </svg>
+              <input v-model="groupSearchQueries[group.typ]"
+                type="text" placeholder="Search"
+                style="width:100%;padding:7px 10px 7px 28px;font-size:12px;border:1px solid #d4d5d9;border-radius:4px;outline:none;color:#282c3f;background:#fff;box-sizing:border-box;" />
+            </div>
+
+            <div class="filter-scroll" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:0;">
+              <label
+                v-for="item in getFilteredSidebarItems(group)"
+                :key="item.name"
+                @click.prevent="toggleFilter(group.typ, item.name)"
+                style="display:flex;align-items:center;gap:10px;padding:7px 2px;cursor:pointer;border-radius:2px;"
+                :style="{ background: isSelected(group.typ, item.name) ? '#fff0f3' : 'transparent' }"
+              >
+                <!-- Custom checkbox -->
+                <span :style="{
+                  width:'16px', height:'16px', minWidth:'16px',
+                  border: isSelected(group.typ, item.name) ? '2px solid #ff3f6c' : '2px solid #d4d5d9',
+                  borderRadius:'3px',
+                  background: isSelected(group.typ, item.name) ? '#ff3f6c' : '#fff',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  transition:'all 0.15s'
+                }">
+                  <svg v-if="isSelected(group.typ, item.name)" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5">
+                    <path d="M5 13l4 4L19 7"/>
+                  </svg>
+                </span>
+                <span :style="{
+                  fontSize:'13px',
+                  color: isSelected(group.typ, item.name) ? '#ff3f6c' : '#282c3f',
+                  fontWeight: isSelected(group.typ, item.name) ? '600' : '400',
+                  flex:'1',
+                  overflow:'hidden',
+                  textOverflow:'ellipsis',
+                  whiteSpace:'nowrap'
+                }">{{ item.name }}</span>
+                <span style="font-size:11px;color:#94a3b8;">({{ item.count }})</span>
+              </label>
+            </div>
+          </template>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         MOBILE FLOATING BUTTON + DRAWER (unchanged)
+    ════════════════════════════════════════════════ -->
     <Teleport to="body">
-      <div class="fixed bottom-6 right-6 z-40">
+      <!-- Floating button: hidden on desktop when sidebar is active, always shown on mobile -->
+      <div class="mobile-filter-btn" :style="props.config?.layout === 'sidebar' ? 'display:none' : ''">
+        <div class="fixed bottom-6 right-6 z-40">
         <button @click="mobileFilterOpen = true"
           :class="[
             'text-white px-5 py-3.5 rounded-full shadow-2xl font-bold flex items-center gap-2 uppercase tracking-wide active:scale-95 transition-transform duration-200',
@@ -14,9 +132,10 @@
           Filters
           <span v-if="totalSelectedFilters > 0" class="bg-white text-pink-600 text-[10px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center">{{ totalSelectedFilters }}</span>
         </button>
+        </div>
       </div>
 
-      <!-- Filter Drawer -->
+      <!-- Filter Drawer (always available for mobile) -->
       <transition name="slide-up">
         <div v-if="mobileFilterOpen"
           :class="['fixed inset-0 z-[110] flex flex-col overflow-hidden',
@@ -215,6 +334,19 @@ const currentDirGroup = ref<FilterGroup | null>(null)
 const dirSearchQuery = ref('')
 const directoryContainer = ref<HTMLElement | null>(null)
 
+const collapsedGroups = reactive<Record<string, boolean>>({})
+
+const toggleSidebarGroup = (typ: string) => {
+  collapsedGroups[typ] = !collapsedGroups[typ]
+}
+
+const getFilteredSidebarItems = (group: FilterGroup) => {
+  if (!group?.l) return []
+  const q = groupSearchQueries[group.typ]?.toLowerCase()
+  const items = q ? group.l.filter(i => i.name.toLowerCase().includes(q)) : group.l
+  return items.slice(0, 8) // show max 8, rest hidden behind scroll
+}
+
 const buildFilterQuery = () => {
   const parts: string[] = []
   Object.entries(appliedFilters).forEach(([key, values]) => {
@@ -374,4 +506,20 @@ onMounted(async () => {
 .slide-up-enter-active, .slide-up-leave-active { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 .slide-up-enter-from, .slide-up-leave-to { transform: translateY(100%); }
 .w-1\/3 { border-right: 1px solid rgba(0,0,0,0.05); }
+
+/* Sidebar filter item scrollbar */
+.filter-scroll::-webkit-scrollbar { width: 3px; }
+.filter-scroll::-webkit-scrollbar-track { background: transparent; }
+.filter-scroll::-webkit-scrollbar-thumb { background: #d4d5d9; border-radius: 10px; }
+.filter-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Sidebar overall scrollbar */
+.sidebar-scroll::-webkit-scrollbar { width: 3px; }
+.sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: #e9e9eb; border-radius: 10px; }
+
+/* On mobile: always show floating button even when sidebar layout is set */
+@media (max-width: 767px) {
+  .mobile-filter-btn { display: block !important; }
+}
 </style>
