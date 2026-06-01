@@ -62,7 +62,11 @@
             </div>
 
             <!-- Discount badge -->
-            <span v-if="getDiscount(item.document) > 0"
+            <span v-if="item._fromForm"
+              class="absolute top-2.5 left-2.5 bg-indigo-600 text-white text-[10px] md:text-xs px-2 py-0.5 rounded-full font-bold z-20 shadow-sm">
+              ✦ My Product
+            </span>
+            <span v-else-if="getDiscount(item.document) > 0"
               class="absolute top-2.5 left-2.5 bg-red-500 text-white text-[10px] md:text-xs px-2 py-0.5 rounded-full font-bold z-20 shadow-sm animate-pulse-once">
               -{{ getDiscount(item.document) }}%
             </span>
@@ -148,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import ContentEngine from './Contentengin.vue';
@@ -160,7 +164,9 @@ const { _p, __p:_$p } = defineProps<{ _p: _p_TYP, __p: _$p_TYP }>();
 
 const router = useRouter();
 const searchQuery = ref('');
-const products = ref<any[]>([]);
+const formProducts = ref<any[]>([]); // products from the custom form
+const apiProducts = ref<any[]>([]); // products from the API
+const products = computed(() => [...formProducts.value, ...apiProducts.value]);
 const activeFilterByString = ref<string>('');
 const isDark = ref(false);
 const loading = ref(true);
@@ -169,6 +175,46 @@ const page = ref(1);
 const hasMore = ref(true);
 const sentinel = ref<HTMLElement | null>(null);
 let observer: IntersectionObserver | null = null;
+
+// listen for real-time form updates via window event (cross-app boundary)
+const _onFormChange = (e: Event) => {
+  const list: any[] = (e as CustomEvent).detail?.value?.l ?? [];
+  formProducts.value = list.map((p: any) => ({
+    _fromForm: true,
+    document: {
+      id: `form-${p.title}`,
+      title: p.title || 'Untitled',
+      brand: 'My Store',
+      variant_prices: [Number(p.price) || 0],
+      variant_mrp: [],
+      slug: '',
+    },
+    images: p.image ? [p.image] : [],
+    activeIdx: 0,
+    interval: null,
+  }));
+};
+window.addEventListener('product:form:change', _onFormChange);
+
+// also listen via CE bus (works when same _p instance is shared)
+_p.f.listen('msg', (_$: any) => {
+  if (_$.type !== 'product:form:change') return;
+  const list: any[] = _$.custom?.data?.value?.l ?? [];
+  formProducts.value = list.map((p: any) => ({
+    _fromForm: true,
+    document: {
+      id: `form-${p.title}`,
+      title: p.title || 'Untitled',
+      brand: 'My Store',
+      variant_prices: [Number(p.price) || 0],
+      variant_mrp: [],
+      slug: '',
+    },
+    images: p.image ? [p.image] : [],
+    activeIdx: 0,
+    interval: null,
+  }));
+});
 
 const _t_temp = createTemplate(_$p.data.curr.data.api[`token`], {open:"<",close:">"});
 const _token = _t_temp({ localStorage: { token: localStorage.getItem(`token`) || `` } }).replace(`Bearer `, ``);
@@ -193,7 +239,7 @@ const initTheme = () => {
 };
 
 const handleSearch = async () => {
-  loading.value = true; products.value = []; page.value = 1; hasMore.value = true;
+  loading.value = true; apiProducts.value = []; page.value = 1; hasMore.value = true;
   const urlParams = new URLSearchParams(window.location.search);
   if (searchQuery.value) urlParams.set('q', searchQuery.value); else urlParams.delete('q');
   window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
@@ -231,7 +277,7 @@ const fetchProducts = async () => {
     if (prodRes.data.success && prodRes.data.data?.products?.length > 0) {
       await new Promise(r => setTimeout(r, 300));
       for (const curr of prodRes.data.data.products) {
-        products.value.push({ document: curr, images: getImages(curr), activeIdx: 0, interval: null });
+        apiProducts.value.push({ document: curr, images: getImages(curr), activeIdx: 0, interval: null });
       }
       loading.value = false;
     } else { hasMore.value = false; loading.value = false; }
@@ -310,11 +356,33 @@ const toggleWishlist = (e: Event) => {
 
 onMounted(() => {
   initTheme();
+  // replay persisted form products immediately on load
+  try {
+    const key = `product_form_${_$p?.data?.curr?.id ?? 'default'}`;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      const list: any[] = JSON.parse(saved);
+      formProducts.value = list.map((p: any) => ({
+        _fromForm: true,
+        document: {
+          id: `form-${p.title}`,
+          title: p.title || 'Untitled',
+          brand: 'My Store',
+          variant_prices: [Number(p.price) || 0],
+          variant_mrp: [],
+          slug: '',
+        },
+        images: p.image ? [p.image] : [],
+        activeIdx: 0,
+        interval: null,
+      }));
+    }
+  } catch {}
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('q')) searchQuery.value = urlParams.get('q') || '';
   handleSearch().then(() => setTimeout(() => setupObserver(), 100));
 });
-onUnmounted(() => { if (observer) observer.disconnect(); });
+onUnmounted(() => { if (observer) observer.disconnect(); window.removeEventListener('product:form:change', _onFormChange); });
 </script>
 
 <style>

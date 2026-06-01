@@ -158,7 +158,7 @@ const mE_s = document.getElementById(_a) || (() => { let e = document.createElem
 //console.log(mE_s);
 const mE_log = document.getElementById(_b) || (() => { let e = document.createElement("div"); e.id = _b; mE_a!.appendChild(e); return e; })();
 //console.log(mE_log);
-const mE_preview = document.getElementById(_c) || (() => { let e = document.createElement("div"); e.id = _c; mE_a!.appendChild(e); return e; })();
+const mE_preview = document.getElementById(_c) || (() => { let e = document.createElement("div"); e.id = _c; mE_a!.appendChild(e); return e; })();;
 
 
 //set..
