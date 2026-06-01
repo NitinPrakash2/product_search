@@ -1,140 +1,130 @@
 <template>
-  <div class="bg-white min-h-screen font-sans text-slate-900 antialiased">
+  <div class="bg-gray-50/50 dark:bg-[#0b1120] min-h-screen font-sans text-slate-900 dark:text-slate-100 antialiased">
 
     <!-- Myntra-style layout: sidebar + content -->
-    <div style="display:flex;align-items:flex-start;width:100%;background:#f8fafc;">
+    <div style="display:flex;align-items:flex-start;width:100%;">
 
       <!-- LEFT SIDEBAR FILTER -->
-      <aside id="desktop-sidebar" style="width:240px;min-width:240px;border-right:1px solid #e5e7eb;position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#e9e9eb transparent;">
-        <ProductFilter :_p="_p" :_$p="_$p" :_$cb="filterCb" :config="{ theme: isDark ? 'dark' : 'light', layout: 'sidebar' }" />
+      <aside id="desktop-sidebar" class="desktop-sidebar-hide" :style="{ width:'240px', minWidth:'240px', borderRight:'1px solid ' + (isDark ? '#334155' : '#e5e7eb'), position:'sticky', top:'0', height:'100vh', overflowY:'auto', scrollbarWidth:'thin', scrollbarColor:'#e9e9eb transparent' }">
+        <ProductFilter :_p="_p" :_$p="_$p" :_$cb="filterCb" :config="{ theme: isDark ? 'dark' : 'light', layout: 'sidebar' }" style="height:100%;" />
       </aside>
 
       <!-- RIGHT CONTENT -->
-      <div style="flex:1;min-width:0;padding:16px 20px 80px;">
+      <div style="flex:1;min-width:0;padding:20px 20px 80px;background:transparent;">
 
-      <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-        <div v-for="n in 12" :key="n" class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex flex-col gap-3">
-          <div class="aspect-[4/5] bg-gray-100 rounded-xl relative overflow-hidden">
-            <div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div>
+      <div v-if="loading" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+        <div v-for="n in 12" :key="n" class="bg-white dark:bg-[#1e293b] rounded-2xl p-3 shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col gap-3">
+          <div class="aspect-[4/5] bg-gray-200 dark:bg-slate-700/50 rounded-xl relative overflow-hidden">
+            <div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
           </div>
           <div class="space-y-2 mt-1 px-1">
-            <div class="h-5 bg-gray-100 rounded-md w-1/2 relative overflow-hidden"><div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div></div>
-            <div class="h-3 bg-gray-100 rounded-md w-1/3 relative overflow-hidden"><div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div></div>
-            <div class="h-10 bg-gray-100 rounded-xl w-full mt-3 relative overflow-hidden"><div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div></div>
+            <div class="h-5 bg-gray-200 dark:bg-slate-700/50 rounded-md w-1/2 relative overflow-hidden"><div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div></div>
+            <div class="h-3 bg-gray-200 dark:bg-slate-700/50 rounded-md w-1/3 relative overflow-hidden"><div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div></div>
+            <div class="h-4 bg-gray-200 dark:bg-slate-700/50 rounded-md w-full relative overflow-hidden mt-2"><div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div></div>
+            <div class="h-10 bg-gray-200 dark:bg-slate-700/50 rounded-xl w-full mt-3 relative overflow-hidden"><div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div></div>
           </div>
         </div>
       </div>
 
-      <ul v-else-if="products.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5 list-none">
-        <li
-          v-for="(item, index) in products"
-          :key="(item.document?.id || '') + index"
-          class="card-enter group relative flex flex-col cursor-pointer rounded-2xl bg-white dark:bg-[#1e293b] border border-gray-100 dark:border-slate-700/40 shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none hover:shadow-[0_16px_40px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_40px_rgba(0,0,0,0.5)] hover:-translate-y-2 transition-all duration-300 ease-out overflow-hidden"
-          :style="{ animationDelay: `${(index % 10) * 50}ms` }"
-          @click="goToProduct(item)"
-        >
-          <!-- Image area -->
-          <div class="relative overflow-hidden bg-gray-50 dark:bg-slate-800/60"
-            @mouseenter="startHoverCycle(item)"
-            @mouseleave="stopHoverCycle(item)"
-            @touchstart="handleTouchStart($event, item)"
-            @touchend="handleTouchEnd($event, item)"
+      <ul v-else-if="products.length > 0" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 list-none">
+          <li 
+            v-for="(item, index) in products" 
+            :key="(item.document?.id || '') + index" 
+            class="group bg-white dark:bg-[#1e293b] rounded-2xl flex flex-col relative cursor-pointer border border-gray-200/60 dark:border-slate-700/50 shadow-sm hover:shadow-xl dark:shadow-none dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+            @click="goToProduct(item)"
           >
-            <div class="aspect-[4/5] relative">
-              <template v-if="item.images && item.images.length > 0">
-                <img
-                  v-for="(img, idx) in item.images"
-                  :key="idx"
-                  :src="img"
-                  loading="lazy"
-                  :alt="item.document?.title || item.document?.brand"
-                  @error="handleImageError"
-                  class="absolute inset-0 w-full h-full object-cover transition-all duration-700 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105"
-                  :class="idx === item.activeIdx ? 'opacity-100 z-10' : 'opacity-0 z-0'"
-                />
-              </template>
-              <div v-else class="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-slate-800 text-gray-400 text-xs">No Image</div>
-            </div>
+            
+            <div>
+              <div 
+                class="aspect-[4/5] relative bg-gray-100 dark:bg-slate-800/80 overflow-hidden group/image"
+                @mouseenter="startHoverCycle(item)"
+                @mouseleave="stopHoverCycle(item)"
+                @touchstart="handleTouchStart($event, item)"
+                @touchend="handleTouchEnd($event, item)"
+              >
+                <template v-if="item.images && item.images.length > 0">
+                  <img 
+                    v-for="(img, idx) in item.images" 
+                    :key="idx"
+                    :src="img" 
+                    loading="lazy" 
+                    :alt="item.document?.title || item.document?.brand"
+                    @error="handleImageError"
+                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 mix-blend-multiply dark:mix-blend-normal" 
+                    :class="idx === item.activeIdx ? 'opacity-100 z-10' : 'opacity-0 z-0'"
+                  />
+                </template>
 
-            <!-- Hover overlay -->
-            <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
+                <div v-else class="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-slate-800 text-gray-400 text-xs font-medium">
+                  No Image
+                </div>
 
-            <!-- Image dots -->
-            <div v-if="item.images && item.images.length > 1"
-              class="absolute bottom-10 left-0 w-full flex justify-center gap-1.5 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div v-for="(_, idx) in item.images" :key="'nav-'+idx"
-                @mouseenter.stop="setActiveImage(item, idx)"
-                class="w-1.5 h-1.5 rounded-full cursor-pointer transition-all duration-300"
-                :class="idx === item.activeIdx ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/90'"></div>
-            </div>
+                <div 
+                  v-if="item.images && item.images.length > 1"
+                  class="absolute bottom-3 left-0 w-full flex justify-center gap-1.5 z-20 opacity-100 md:opacity-0 md:group-hover/image:opacity-100 transition-opacity duration-300"
+                >
+                  <div 
+                    v-for="(_, idx) in item.images" 
+                    :key="'nav-'+idx"
+                    @mouseenter.stop="setActiveImage(item, idx)"
+                    class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full cursor-pointer transition-all duration-300"
+                    :class="idx === item.activeIdx ? 'bg-white scale-125 shadow-[0_0_2px_rgba(0,0,0,0.5)]' : 'bg-white/50 hover:bg-white/90'"
+                  ></div>
+                </div>
+                
+                <span v-if="item._fromForm" class="absolute top-2 left-2 bg-indigo-600 text-white text-[10px] md:text-xs px-2 py-1 rounded-md font-bold shadow-sm tracking-wide z-20">
+                  ✦ My Product
+                </span>
+                <span v-else-if="getDiscount(item.document) > 0" class="absolute top-2 left-2 bg-red-500/90 backdrop-blur-md text-white text-[10px] md:text-xs px-2 py-1 rounded-md font-bold shadow-sm tracking-wide z-20">
+                  -{{ getDiscount(item.document) }}%
+                </span>
 
-            <!-- Discount badge -->
-            <span v-if="item._fromForm"
-              class="absolute top-2.5 left-2.5 bg-indigo-600 text-white text-[10px] md:text-xs px-2 py-0.5 rounded-full font-bold z-20 shadow-sm">
-              ✦ My Product
-            </span>
-            <span v-else-if="getDiscount(item.document) > 0"
-              class="absolute top-2.5 left-2.5 bg-red-500 text-white text-[10px] md:text-xs px-2 py-0.5 rounded-full font-bold z-20 shadow-sm animate-pulse-once">
-              -{{ getDiscount(item.document) }}%
-            </span>
-
-            <!-- Wishlist button -->
-            <button
-              class="wishlist-btn absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm flex items-center justify-center shadow-md z-20 opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-200"
-              @click.stop="toggleWishlist">
-              <svg class="w-4 h-4 wishlist-icon text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-              </svg>
-            </button>
-          </div>
-
-          <!-- Card body -->
-          <div class="p-3 md:p-3.5 flex flex-col flex-1 gap-1">
-            <!-- Brand -->
-            <p class="text-[9px] md:text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest truncate">{{ item.document?.brand || '\u00A0' }}</p>
-
-            <!-- Title -->
-            <h3 class="text-[12px] md:text-[13px] leading-snug text-slate-700 dark:text-slate-300 font-medium line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
-              {{ item.document?.title || item.document?.brand || 'Premium Product' }}
-            </h3>
-
-            <div class="flex-1"></div>
-
-            <!-- Rating -->
-            <div class="flex items-center gap-1 mt-1">
-              <div class="flex">
-                <span v-for="s in 5" :key="s" class="text-amber-400 text-[10px]">★</span>
+                <button 
+                  class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 dark:bg-slate-900/60 backdrop-blur-md flex items-center justify-center text-slate-400 dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 hover:bg-white dark:hover:bg-slate-800 transition-all duration-200 opacity-100 md:opacity-0 md:group-hover:opacity-100 transform md:translate-y-1 md:group-hover:translate-y-0 shadow-sm z-20"
+                  @click.stop="toggleWishlist"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </button>
               </div>
-              <span class="text-[10px] text-slate-400 dark:text-slate-500">(128)</span>
             </div>
 
-            <!-- Price row -->
-            <div class="flex items-center gap-2 mt-1">
-              <span class="text-base md:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
-                {{ formatPrice(item.document?.variant_prices?.[0] || 0) }} ₽
-              </span>
-              <span v-if="(item.document?.variant_mrp?.[0] || 0) > (item.document?.variant_prices?.[0] || 0)"
-                class="text-[11px] text-slate-400 line-through">
-                {{ formatPrice(item.document?.variant_mrp?.[0] || 0) }}
-              </span>
-              <span class="ml-auto bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                <span class="w-1 h-1 rounded-full bg-green-500 animate-pulse"></span> Card
-              </span>
-            </div>
+            <div class="p-3.5 md:p-4 flex flex-col flex-1 gap-1.5">
+              
+              <div class="flex items-center gap-2 mb-0.5">
+                <span class="text-lg md:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  {{ formatPrice(item.document?.variant_prices?.[0] || 0) }} ₽
+                </span>
+                <span v-if="(item.document?.variant_mrp?.[0] || 0) > (item.document?.variant_prices?.[0] || 0)" class="text-[11px] md:text-xs text-slate-400 dark:text-slate-500 font-medium line-through decoration-slate-300 dark:decoration-slate-600">
+                  {{ formatPrice(item.document?.variant_mrp?.[0] || 0) }}
+                </span>
+              </div>
 
-            <!-- Add to cart button -->
-            <button
-              class="mt-2.5 w-full py-2 md:py-2.5 bg-slate-900 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-500 text-white rounded-xl text-xs md:text-sm font-semibold active:scale-[0.97] transition-all duration-200 flex items-center justify-center gap-2 group/btn overflow-hidden relative"
-              @click.stop="addToCart(item)">
-              <span class="relative z-10 flex items-center gap-2">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-                Add to Cart
-              </span>
-              <span class="absolute inset-0 bg-blue-600 dark:bg-blue-500 translate-x-[-101%] group-hover/btn:translate-x-0 transition-transform duration-300 ease-out"></span>
-            </button>
-          </div>
-        </li>
-      </ul>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 border border-green-200/50 dark:border-green-800/50">
+                   <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Ozon Card
+                </span>
+                <div class="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                   <span class="text-amber-400 text-xs">★</span> 4.9 <span class="text-slate-400 dark:text-slate-500">(128)</span>
+                </div>
+              </div>
+
+              <div class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">{{ item.document?.brand }}</div>
+              <h3 class="text-[13px] leading-snug text-slate-700 dark:text-slate-300 font-medium line-clamp-2 h-[2.6em]">
+                {{ item.document?.title || item.document?.brand || 'Premium Product' }}
+              </h3>
+
+              <div class="flex-1"></div>
+
+              <button 
+                class="mt-3 w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-[0_4px_12px_rgba(37,99,235,0.2)] hover:shadow-[0_6px_16px_rgba(37,99,235,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group/btn"
+                @click.stop="addToCart(item)"
+              >
+                <span>Add to Cart</span>
+                <svg class="w-4 h-4 transition-transform group-hover/btn:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </li>
+        </ul>
 
       <div v-else class="flex flex-col items-center justify-center py-24 px-4 bg-white dark:bg-[#1e293b] rounded-3xl border border-gray-100 dark:border-slate-800/60 shadow-sm mt-4">
         <div class="w-20 h-20 bg-blue-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-3xl mb-5">🔍</div>
@@ -351,15 +341,9 @@ const addToCart = (_v: any) => {
 };
 const toggleWishlist = (e: Event) => {
   const btn = e.currentTarget as HTMLElement;
-  const icon = btn.querySelector('.wishlist-icon') as SVGElement;
-  const isWished = btn.classList.toggle('wished');
-  if (icon) {
-    icon.style.stroke = isWished ? '#ef4444' : '';
-    icon.style.fill = isWished ? '#ef4444' : 'none';
-    icon.classList.toggle('scale-125', isWished);
-  }
-  btn.classList.toggle('bg-red-50', isWished);
-  btn.classList.toggle('dark:bg-red-500/20', isWished);
+  btn.classList.toggle('text-red-500');
+  btn.classList.toggle('bg-red-50');
+  btn.classList.toggle('dark:bg-red-500/20');
 };
 
 onMounted(() => {
@@ -394,38 +378,44 @@ onUnmounted(() => { if (observer) observer.disconnect(); window.removeEventListe
 </script>
 
 <style>
-@keyframes shimmer { 100% { transform: translateX(100%); } }
+/* Shimmer Animation */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
 
-/* Hide sidebar on mobile, show on desktop */
+/* Hide sidebar on mobile */
 @media (max-width: 767px) {
-  #desktop-sidebar { display: none !important; }
+  .desktop-sidebar-hide {
+    display: none !important;
+  }
 }
 
-/* Card entrance animation */
-@keyframes cardEnter {
-  from { opacity: 0; transform: translateY(20px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)   scale(1); }
-}
-.card-enter {
-  animation: cardEnter 0.4s ease-out both;
+/* Custom Styled Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-/* Discount badge one-time pulse */
-@keyframes pulseOnce {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.2); }
-  100% { transform: scale(1); }
+::-webkit-scrollbar-track {
+  background: transparent;
 }
-.animate-pulse-once { animation: pulseOnce 0.6s ease-out 0.3s both; }
 
-/* Wishlist icon transition */
-.wishlist-icon { transition: fill 0.2s ease, stroke 0.2s ease, transform 0.2s ease; }
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-.dark ::-webkit-scrollbar-thumb { background: #334155; }
-.dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
 </style>

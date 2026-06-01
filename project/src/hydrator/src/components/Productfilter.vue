@@ -4,11 +4,11 @@
     <!-- ═══════════════════════════════════════════════
          SIDEBAR LAYOUT (desktop) — Myntra style
     ════════════════════════════════════════════════ -->
-    <div v-if="props.config?.layout === 'sidebar'" class="sidebar-scroll" style="background:#fff;height:100%;overflow-y:auto;">
+    <div v-if="props.config?.layout === 'sidebar'" class="sidebar-scroll" :style="{ background: props.config?.theme === 'dark' ? '#1e293b' : '#fff', height:'100%', overflowY:'auto' }">
 
       <!-- Header -->
-      <div style="padding:16px 16px 12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:13px;font-weight:800;letter-spacing:0.08em;color:#282c3f;">FILTERS</span>
+      <div :style="{ padding:'16px 16px 12px', borderBottom:'1px solid ' + (props.config?.theme === 'dark' ? '#334155' : '#f0f0f0'), display:'flex', alignItems:'center', justifyContent:'space-between' }">
+        <span :style="{ fontSize:'13px', fontWeight:'800', letterSpacing:'0.08em', color: props.config?.theme === 'dark' ? '#e2e8f0' : '#282c3f' }">{{ filtersLabel }}</span>
         <button v-if="totalSelectedFilters > 0" @click="clearAllFilters"
           style="font-size:11px;font-weight:700;color:#ff3f6c;letter-spacing:0.04em;background:none;border:none;cursor:pointer;">
           CLEAR ALL
@@ -16,7 +16,7 @@
       </div>
 
       <!-- Applied filter chips -->
-      <div v-if="totalSelectedFilters > 0" style="padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid #f0f0f0;">
+      <div v-if="totalSelectedFilters > 0" :style="{ padding:'8px 12px', display:'flex', flexWrap:'wrap', gap:'6px', borderBottom:'1px solid ' + (props.config?.theme === 'dark' ? '#334155' : '#f0f0f0') }">
         <template v-for="(vals, typ) in appliedFilters" :key="typ">
           <span v-for="val in (Array.isArray(vals) ? vals : [])"
             :key="val"
@@ -29,12 +29,12 @@
 
       <!-- Filter groups -->
       <div v-for="group in visibleFilterGroups" :key="group.typ"
-        style="border-bottom:1px solid #f0f0f0;">
+        :style="{ borderBottom:'1px solid ' + (props.config?.theme === 'dark' ? '#334155' : '#f0f0f0') }">
 
         <!-- Group header -->
         <button @click="toggleSidebarGroup(group.typ)"
           style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:none;border:none;cursor:pointer;">
-          <span style="font-size:11px;font-weight:800;letter-spacing:0.08em;color:#282c3f;">
+          <span :style="{ fontSize:'11px', fontWeight:'800', letterSpacing:'0.08em', color: props.config?.theme === 'dark' ? '#e2e8f0' : '#282c3f' }">
             {{ group.title.toUpperCase() }}
             <span v-if="appliedFilters[group.typ]?.length"
               style="margin-left:4px;background:#ff3f6c;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;">
@@ -54,9 +54,9 @@
           <template v-if="group.typ === 'price'">
             <div style="display:flex;gap:8px;margin-bottom:8px;">
               <input v-model="customPriceMin" type="number" placeholder="Min"
-                style="width:100%;padding:7px 10px;font-size:12px;border:1px solid #d4d5d9;border-radius:4px;outline:none;color:#282c3f;background:#fff;" />
+                :style="{ width:'100%', padding:'7px 10px', fontSize:'12px', border:'1px solid ' + (props.config?.theme === 'dark' ? '#334155' : '#d4d5d9'), borderRadius:'4px', outline:'none', color: props.config?.theme === 'dark' ? '#e2e8f0' : '#282c3f', background: props.config?.theme === 'dark' ? '#0f172a' : '#fff' }" />
               <input v-model="customPriceMax" type="number" placeholder="Max"
-                style="width:100%;padding:7px 10px;font-size:12px;border:1px solid #d4d5d9;border-radius:4px;outline:none;color:#282c3f;background:#fff;" />
+                :style="{ width:'100%', padding:'7px 10px', fontSize:'12px', border:'1px solid ' + (props.config?.theme === 'dark' ? '#334155' : '#d4d5d9'), borderRadius:'4px', outline:'none', color: props.config?.theme === 'dark' ? '#e2e8f0' : '#282c3f', background: props.config?.theme === 'dark' ? '#0f172a' : '#fff' }" />
             </div>
             <button @click="applyCustomPrice"
               style="width:100%;padding:8px;font-size:12px;font-weight:700;color:#fff;background:#ff3f6c;border:none;border-radius:4px;cursor:pointer;letter-spacing:0.04em;">
@@ -72,7 +72,7 @@
               </svg>
               <input v-model="groupSearchQueries[group.typ]"
                 type="text" placeholder="Search"
-                style="width:100%;padding:7px 10px 7px 28px;font-size:12px;border:1px solid #d4d5d9;border-radius:4px;outline:none;color:#282c3f;background:#fff;box-sizing:border-box;" />
+                :style="{ width:'100%', padding:'7px 10px 7px 28px', fontSize:'12px', border:'1px solid ' + (props.config?.theme === 'dark' ? '#334155' : '#d4d5d9'), borderRadius:'4px', outline:'none', color: props.config?.theme === 'dark' ? '#e2e8f0' : '#282c3f', background: props.config?.theme === 'dark' ? '#0f172a' : '#fff', boxSizing:'border-box' }" />
             </div>
 
             <div class="filter-scroll" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:0;">
@@ -81,14 +81,14 @@
                 :key="item.name"
                 @click.prevent="toggleFilter(group.typ, item.name)"
                 style="display:flex;align-items:center;gap:10px;padding:7px 2px;cursor:pointer;border-radius:2px;"
-                :style="{ background: isSelected(group.typ, item.name) ? '#fff0f3' : 'transparent' }"
+                :style="{ background: isSelected(group.typ, item.name) ? (props.config?.theme === 'dark' ? 'rgba(255,63,108,0.1)' : '#fff0f3') : 'transparent' }"
               >
                 <!-- Custom checkbox -->
                 <span :style="{
                   width:'16px', height:'16px', minWidth:'16px',
-                  border: isSelected(group.typ, item.name) ? '2px solid #ff3f6c' : '2px solid #d4d5d9',
+                  border: isSelected(group.typ, item.name) ? '2px solid #ff3f6c' : ('2px solid ' + (props.config?.theme === 'dark' ? '#475569' : '#d4d5d9')),
                   borderRadius:'3px',
-                  background: isSelected(group.typ, item.name) ? '#ff3f6c' : '#fff',
+                  background: isSelected(group.typ, item.name) ? '#ff3f6c' : (props.config?.theme === 'dark' ? '#1e293b' : '#fff'),
                   display:'flex', alignItems:'center', justifyContent:'center',
                   transition:'all 0.15s'
                 }">
@@ -98,7 +98,7 @@
                 </span>
                 <span :style="{
                   fontSize:'13px',
-                  color: isSelected(group.typ, item.name) ? '#ff3f6c' : '#282c3f',
+                  color: isSelected(group.typ, item.name) ? '#ff3f6c' : (props.config?.theme === 'dark' ? '#e2e8f0' : '#282c3f'),
                   fontWeight: isSelected(group.typ, item.name) ? '600' : '400',
                   flex:'1',
                   overflow:'hidden',
@@ -334,6 +334,15 @@ const currentDirGroup = ref<FilterGroup | null>(null)
 const dirSearchQuery = ref('')
 const directoryContainer = ref<HTMLElement | null>(null)
 
+const SETTINGS_KEY = `product_form_settings_${props._$p?.data?.curr?.id ?? 'default'}`
+const filtersLabel = ref('FILTERS')
+
+const _onFormChange = (e: Event) => {
+  const label = (e as CustomEvent).detail?.value?.filtersLabel
+  if (label !== undefined) filtersLabel.value = label || 'FILTERS'
+}
+window.addEventListener('product:form:change', _onFormChange)
+
 const collapsedGroups = reactive<Record<string, boolean>>({})
 
 const toggleSidebarGroup = (typ: string) => {
@@ -493,6 +502,11 @@ watch(visibleFilterGroups, (newVal) => {
 }, { immediate: true })
 
 onMounted(async () => {
+  // load persisted label
+  try {
+    const saved = localStorage.getItem(SETTINGS_KEY)
+    if (saved) filtersLabel.value = JSON.parse(saved).filtersLabel || 'FILTERS'
+  } catch {}
   parseUrlToState()
   props._$cb?.change?.({ filter_by: buildFilterQuery() })
   await fetchFilters(true)
@@ -510,13 +524,14 @@ onMounted(async () => {
 /* Sidebar filter item scrollbar */
 .filter-scroll::-webkit-scrollbar { width: 3px; }
 .filter-scroll::-webkit-scrollbar-track { background: transparent; }
-.filter-scroll::-webkit-scrollbar-thumb { background: #d4d5d9; border-radius: 10px; }
-.filter-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.filter-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+.filter-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
 /* Sidebar overall scrollbar */
-.sidebar-scroll::-webkit-scrollbar { width: 3px; }
+.sidebar-scroll::-webkit-scrollbar { width: 4px; }
 .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-.sidebar-scroll::-webkit-scrollbar-thumb { background: #e9e9eb; border-radius: 10px; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+.sidebar-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
 
 /* On mobile: always show floating button even when sidebar layout is set */
 @media (max-width: 767px) {
